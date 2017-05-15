@@ -64,8 +64,9 @@ public class MongodbSourceTaskTest extends TestCase {
                     .replication(new Storage(REPLICATION_PATH, "rs0", 1024))
                     .net(new Net(mongoPort, Network.localhostIsIPv6()))
                     .build();
-            //mongodExecutable = mongodStarter.prepare(mongodConfig);
-            //mongod = mongodExecutable.start();
+            // Comment below 2 lines if your server already having mongo server up and running, check tearDown() function too 
+            mongodExecutable = mongodStarter.prepare(mongodConfig);
+            mongod = mongodExecutable.start();
             mongoClient = new MongoClient(new ServerAddress("localhost", mongoPort));
             MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
 
@@ -179,6 +180,7 @@ public class MongodbSourceTaskTest extends TestCase {
     public void tearDown() {
         try {
             super.tearDown();
+            // Comment below 2 lines if your server already having mongo server up and running 
             mongod.stop();
             mongodExecutable.stop();
             System.out.println("DELETING OPLOG");
