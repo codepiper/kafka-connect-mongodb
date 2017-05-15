@@ -53,6 +53,7 @@ public class MongodbSourceTaskTest extends TestCase {
 
     @Override
     public void setUp() {
+    	Integer mongoPort = 27017; // Common place for port number. We are using the default one than 12345
         offsets = new HashMap<>();
         totalWrittenDocuments = 0;
         try {
@@ -61,11 +62,11 @@ public class MongodbSourceTaskTest extends TestCase {
             mongodConfig = new MongodConfigBuilder()
                     .version(Version.Main.V3_2)
                     .replication(new Storage(REPLICATION_PATH, "rs0", 1024))
-                    .net(new Net(12345, Network.localhostIsIPv6()))
+                    .net(new Net(mongoPort, Network.localhostIsIPv6()))
                     .build();
-            mongodExecutable = mongodStarter.prepare(mongodConfig);
-            mongod = mongodExecutable.start();
-            mongoClient = new MongoClient(new ServerAddress("localhost", 12345));
+            //mongodExecutable = mongodStarter.prepare(mongodConfig);
+            //mongod = mongodExecutable.start();
+            mongoClient = new MongoClient(new ServerAddress("localhost", mongoPort));
             MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
 
             BasicDBObject replicaSetSetting = new BasicDBObject();
@@ -73,7 +74,7 @@ public class MongodbSourceTaskTest extends TestCase {
             BasicDBList members = new BasicDBList();
             DBObject host = new BasicDBObject();
             host.put("_id", 0);
-            host.put("host", "127.0.0.1:12345");
+            host.put("host", "127.0.0.1:"+mongoPort);
             members.add(host);
             replicaSetSetting.put("members", members);
             adminDatabase.runCommand(new BasicDBObject("isMaster", 1));
@@ -94,7 +95,7 @@ public class MongodbSourceTaskTest extends TestCase {
 
         sourceProperties = new HashMap<>();
         sourceProperties.put("host", "localhost");
-        sourceProperties.put("port", Integer.toString(12345));
+        sourceProperties.put("port", Integer.toString(mongoPort));
         sourceProperties.put("batch.size", Integer.toString(100));
         sourceProperties.put("schema.name", "schema");
         sourceProperties.put("topic.prefix", "prefix");
